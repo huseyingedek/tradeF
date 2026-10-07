@@ -118,7 +118,7 @@ export default function Markets() {
                       </button>
                     </td>
                     <td>
-                      <div className="fw-semibold">{t.symbol}{t.source === 'sim' && <span className="chip gray ms-2" style={{ fontSize: 10, padding: "1px 6px" }} title="Gerçek zamanlı veri kaynağı yok – simüle edilmiş fiyat">SİM</span>}</div>
+                      <div className="fw-semibold">{t.symbol}{t.source === 'sim' && <span className="chip gray ms-2" style={{ fontSize: 10, padding: "1px 6px" }} title="Gerçek zamanlı veri kaynağı yok – simüle edilmiş fiyat">SİM</span>}{t.source === 'stale' && <span className="chip yellow ms-2" style={{ fontSize: 10, padding: "1px 6px" }} title="Veri kaynağına geçici olarak ulaşılamıyor – son gerçek fiyat gösteriliyor">GECİKMELİ</span>}</div>
                       <div className="fs-12 text-muted d-flex gap-2 align-items-center">{t.ins.name} <span className="d-none d-sm-inline"><MarketBadge market={t.ins.market} /></span></div>
                     </td>
                     <td className="text-end num fw-semibold"><FlashNumber value={t.last}>{fmtNum(t.last)}</FlashNumber></td>
