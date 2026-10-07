@@ -27,16 +27,16 @@ export default function Overview() {
 
       <div className="row">
         <div className="col-xl-3 col-sm-6">
-          <StatCard variant="purple" icon={FiUsers} label="Toplam Kullanıcı" value={fmtNum(k.totalUsers, 0)} sub={`+${k.newUsers7d} bu hafta (${fmtPct(k.newUsers7dChangePct, 0)})`} />
+          <StatCard variant="purple" icon={FiUsers} label="Toplam Kullanıcı" value={fmtNum(k.totalUsers, 0)} sub={`+${k.newUsers7d} bu hafta${k.newUsers7dChangePct != null ? ` (${fmtPct(k.newUsers7dChangePct, 0)})` : ''}`} />
         </div>
         <div className="col-xl-3 col-sm-6">
           <StatCard variant="sky" icon={FiActivity} label="Aktif (24 saat)" value={fmtNum(k.activeUsers24h, 0)} sub={`${fmtNum((k.activeUsers24h / k.totalUsers) * 100, 1)}% kullanıcı`} />
         </div>
         <div className="col-xl-3 col-sm-6">
-          <StatCard variant="green" icon={FiDollarSign} label="Aylık Yinelenen Gelir" value={fmtMoney(k.mrr, 'TRY', 0)} sub={`${k.paidUsers} ücretli · dönüşüm %${fmtNum(k.conversionPct, 1)}`} />
+          <StatCard variant="green" icon={FiDollarSign} label="Aylık Yinelenen Gelir" value={fmtMoney(k.mrr, 'TRY', 0)} sub={`${k.paidUsers} ödeme yapan · dönüşüm %${fmtNum(k.conversionPct, 1)}${k.compUsers ? ` · ${k.compUsers} ücretsiz tanımlı` : ''}`} />
         </div>
         <div className="col-xl-3 col-sm-6">
-          <StatCard variant="lime" icon={FiLink} label="Bağlı Borsa Hesabı" value={fmtNum(k.connectedAccounts, 0)} sub={`Yönetilen varlık ${fmtCompact(k.aumUsd)} $`} />
+          <StatCard variant="lime" icon={FiLink} label="Bağlı Borsa Hesabı" value={fmtNum(k.connectedAccounts, 0)} sub={k.liveAccounts != null ? `${k.liveAccounts} canlı · ${k.paperAccounts} sanal — gerçek varlık ${fmtCompact(k.aumLiveUsd)} $ · sanal ${fmtCompact(k.aumPaperUsd)} $` : `Yönetilen varlık ${fmtCompact(k.aumUsd)} $`} />
         </div>
       </div>
 
