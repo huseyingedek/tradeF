@@ -46,6 +46,8 @@ export const usePortfolioSummary = (mode) => useQuery({ queryKey: qk.summary(mod
 export const usePortfolioHistory = (range, mode) => useQuery({ queryKey: qk.history(range, mode), queryFn: () => portfolioService.history(range, mode), staleTime: 60_000 })
 export const useRules = () => useQuery({ queryKey: qk.rules, queryFn: ruleService.list })
 export const useBots = () => useQuery({ queryKey: qk.bots, queryFn: botService.list })
+/** Bot detayı (durum + alım-satımlar + günlük). ['bots', id] → 'bots' kanalı güncellenince otomatik yenilenir */
+export const useBotDetail = (id) => useQuery({ queryKey: [...qk.bots, id], queryFn: () => botService.get(id), enabled: !!id, refetchInterval: 5000 })
 export const useRisk = () => useQuery({ queryKey: qk.risk, queryFn: riskService.get, refetchInterval: 5000 })
 export const useActivity = (query = {}) => useQuery({ queryKey: qk.activity(query), queryFn: () => activityService.list(query) })
 

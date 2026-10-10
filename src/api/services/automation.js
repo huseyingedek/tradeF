@@ -9,6 +9,7 @@ export const ruleService = {
 
 export const botService = {
   list: () => http.get('/bots'),
+  get: (id) => http.get(`/bots/${id}`),
   create: (bot) => http.post('/bots', bot),
   start: (id) => http.post(`/bots/${id}/start`),
   pause: (id) => http.post(`/bots/${id}/pause`),

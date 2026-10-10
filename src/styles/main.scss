@@ -2115,3 +2115,58 @@ tr.clickable {
     li { margin-bottom: 6px; line-height: 1.45; }
   }
 }
+
+/* Bot detayı */
+.bot-card-head {
+  cursor: pointer;
+  &:hover .fw-semibold {
+    color: var(--hn-primary);
+  }
+}
+.bot-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  @media (max-width: 576px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+.bot-detail-stat {
+  display: flex;
+  flex-direction: column;
+  padding: 0.65rem 0.8rem;
+  border-radius: 10px;
+  background: var(--hn-body-bg, rgba(127, 127, 127, 0.08));
+  small {
+    color: var(--hn-muted);
+    font-size: 0.72rem;
+  }
+  span {
+    font-weight: 600;
+  }
+}
+.bot-target {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.7rem 0;
+  border-top: 1px solid var(--hn-border);
+}
+.bot-grid-current td {
+  background: rgba(72, 169, 248, 0.08);
+}
+.bot-log li {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  gap: 10px;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--hn-border);
+  font-size: 0.86rem;
+  &.lvl-danger span:last-child {
+    color: var(--bs-danger);
+  }
+  &.lvl-success span:last-child {
+    color: var(--bs-success);
+  }
+}

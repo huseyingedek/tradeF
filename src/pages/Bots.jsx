@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { FiPlus, FiPlay, FiPause, FiSquare, FiTrash2, FiRepeat, FiGrid, FiTrendingUp, FiCpu } from 'react-icons/fi'
+import { FiPlus, FiPlay, FiPause, FiSquare, FiTrash2, FiRepeat, FiGrid, FiTrendingUp, FiCpu, FiList } from 'react-icons/fi'
 import Card from '../components/Card'
 import Modal from '../components/Modal'
 import Segmented from '../components/Segmented'
@@ -8,6 +8,7 @@ import EmptyState from '../components/EmptyState'
 import { ExchangeTag, StatusBadge } from '../components/Badges'
 import { useApp } from '../context/AppContext'
 import { useBotAction, useBots, useCreateBot, useLookups, useRisk } from '../api/queries'
+import BotDetailModal from '../components/BotDetailModal'
 import { tickerStore } from '../hooks/useMarket'
 import { duration, fmtMoney, fmtNum, fmtPct, fmtSignedMoney, pnlClass } from '../utils/format'
 import { t, pctText } from '../i18n'
@@ -25,7 +26,7 @@ const configText = (b, quote) => {
   return [t('İz %{0}', c.trailingPct), c.takeProfitPct ? `TP ${pctText(c.takeProfitPct)}` : null].filter(Boolean)
 }
 
-function BotCard({ bot: b }) {
+function BotCard({ bot: b, onOpen }) {
   const lk = useLookups()
   const action = useBotAction()
   const { confirm } = useApp()
@@ -36,7 +37,7 @@ function BotCard({ bot: b }) {
 
   return (
     <div className="hn-card bot-card h-100 mb-0">
-      <div className="d-flex align-items-start gap-3">
+      <div className="d-flex align-items-start gap-3 bot-card-head" role="button" tabIndex={0} onClick={onOpen} onKeyDown={(e) => e.key === 'Enter' && onOpen()} title={t('Detayları göster')}>
         <span className="icon-box"><S.icon /></span>
         <div className="flex-grow-1 min-w-0">
           <div className="fw-semibold text-truncate">{b.name}</div>
@@ -75,6 +76,7 @@ function BotCard({ bot: b }) {
       </div>
       <div className="fs-13 mb-3"><ExchangeTag exchange={lk.exchange[b.exchangeId]} /></div>
       <div className="d-flex gap-2 mt-auto">
+        <button className="btn btn-sm btn-soft" onClick={onOpen} title={t('Alım-satımlar ve bot durumu')}><FiList /> {t('Detay')}</button>
         {b.status !== 'running' && <button className="btn btn-sm btn-success flex-fill" onClick={() => run('start')} disabled={action.isPending}><FiPlay /> {t('Başlat')}</button>}
         {b.status === 'running' && <button className="btn btn-sm btn-warning flex-fill" onClick={() => run('pause')} disabled={action.isPending}><FiPause /> {t('Duraklat')}</button>}
         {b.status !== 'stopped' && (
@@ -273,6 +275,7 @@ export default function Bots() {
   const lk = useLookups()
   const [filter, setFilter] = useState('all')
   const [creating, setCreating] = useState(false)
+  const [detailId, setDetailId] = useState(null)
   const list = bots.filter((b) => filter === 'all' || b.status === filter)
   const toUsd = (v, sym) => (lk.instrument[sym]?.quote === 'TRY' ? v / (tickerStore.get('USD/TRY')?.last || 1) : v)
   const totalPnl = bots.reduce((a, b) => a + toUsd(b.pnl, b.symbol), 0)
@@ -314,13 +317,14 @@ export default function Bots() {
         <div className="row g-4 mb-4">
           {list.map((b) => (
             <div className="col-xxl-4 col-md-6" key={b.id}>
-              <BotCard bot={b} />
+              <BotCard bot={b} onOpen={() => setDetailId(b.id)} />
             </div>
           ))}
         </div>
       )}
 
       {creating && <CreateBotModal onClose={() => setCreating(false)} />}
+      {detailId && <BotDetailModal botId={detailId} onClose={() => setDetailId(null)} />}
     </>
   )
 }
