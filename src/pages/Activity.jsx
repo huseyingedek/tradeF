@@ -5,6 +5,7 @@ import Segmented from '../components/Segmented'
 import { SourceBadge, ExchangeTag } from '../components/Badges'
 import { useActivity, useLookups } from '../api/queries'
 import { fmtDateTime } from '../utils/format'
+import { getLocale } from '../i18n'
 
 const LEVEL_DOT = { danger: 'red', warning: 'yellow', success: 'green', info: 'sky' }
 
@@ -24,7 +25,7 @@ export default function Activity() {
   const groups = useMemo(() => {
     const g = []
     filtered.forEach((a) => {
-      const day = new Date(a.ts).toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long' })
+      const day = new Date(a.ts).toLocaleDateString(getLocale(), { weekday: 'long', day: 'numeric', month: 'long' })
       if (!g.length || g[g.length - 1].day !== day) g.push({ day, items: [] })
       g[g.length - 1].items.push(a)
     })
@@ -84,7 +85,7 @@ export default function Activity() {
                 <div className="flex-grow-1 min-w-0">
                   <div className={a.level === 'danger' ? 'text-down fw-semibold' : ''}>{a.message}</div>
                   <div className="d-flex flex-wrap gap-2 align-items-center fs-12 text-muted mt-1">
-                    <span>{new Date(a.ts).toLocaleTimeString('tr-TR')}</span>
+                    <span>{new Date(a.ts).toLocaleTimeString(getLocale())}</span>
                     <SourceBadge source={a.source} />
                     {a.exchangeId && lk.exchange[a.exchangeId] && <ExchangeTag exchange={lk.exchange[a.exchangeId]} />}
                   </div>

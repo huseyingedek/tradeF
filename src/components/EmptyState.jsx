@@ -1,6 +1,7 @@
 import { FiInbox } from 'react-icons/fi'
+import { t } from '../i18n'
 
-export default function EmptyState({ icon: Icon = FiInbox, title = 'Kayıt yok', text, action }) {
+export default function EmptyState({ icon: Icon = FiInbox, title = t('Kayıt yok'), text, action }) {
   return (
     <div className="text-center py-5 px-3">
       <div className="empty-icon mx-auto mb-3"><Icon /></div>

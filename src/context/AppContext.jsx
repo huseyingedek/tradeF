@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { tokenStore } from '../api/tokenStore'
 import { setUnauthorizedHandler } from '../api/http'
 import { authService } from '../api/services/auth'
+import { t as tr } from '../i18n'
 
 const AppContext = createContext(null)
 
@@ -30,6 +31,8 @@ export function AppProvider({ children }) {
   const [user, setUser] = useState(() => (tokenStore.get() ? read('tn-user', null) : null))
   const [toasts, setToasts] = useState([])
   const [watchlist, setWatchlist] = useState(() => read('tn-watchlist', DEFAULT_WATCHLIST))
+  // Genel bakış görünümü: 'live' (gerçek para) | 'paper' (sanal) – ikisi asla toplanmaz
+  const [viewMode, setViewMode] = useState(() => read('tn-viewmode', null))
   const [confirmState, setConfirmState] = useState(null)
   const confirmResolver = useRef(null)
 
@@ -39,6 +42,7 @@ export function AppProvider({ children }) {
   }, [theme])
   useEffect(() => write('tn-sidebar-mini', sidebarMini), [sidebarMini])
   useEffect(() => write('tn-watchlist', watchlist), [watchlist])
+  useEffect(() => write('tn-viewmode', viewMode), [viewMode])
 
   const login = useCallback((u, token) => {
     if (token) tokenStore.set(token)
@@ -107,7 +111,7 @@ export function AppProvider({ children }) {
    * Onay penceresi: const ok = await confirm({ title, message, confirmText, variant: 'danger' })
    */
   const confirm = useCallback((opts) => {
-    setConfirmState({ confirmText: 'Onayla', cancelText: 'Vazgeç', variant: 'primary', ...opts })
+    setConfirmState({ confirmText: tr('Onayla'), cancelText: tr('Vazgeç'), variant: 'primary', ...opts })
     return new Promise((resolve) => (confirmResolver.current = resolve))
   }, [])
   const resolveConfirm = useCallback((value) => {
@@ -123,9 +127,10 @@ export function AppProvider({ children }) {
       user, login, logout, signOut, refreshUser,
       toasts, toast, dismissToast,
       watchlist, toggleWatch,
+      viewMode, setViewMode,
       confirm, confirmState, resolveConfirm,
     }),
-    [theme, sidebarMini, sidebarOpen, toggleSidebar, user, login, logout, signOut, refreshUser, toasts, toast, dismissToast, watchlist, toggleWatch, confirm, confirmState, resolveConfirm],
+    [theme, sidebarMini, sidebarOpen, toggleSidebar, user, login, logout, signOut, refreshUser, toasts, toast, dismissToast, watchlist, toggleWatch, viewMode, confirm, confirmState, resolveConfirm],
   )
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>

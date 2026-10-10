@@ -7,6 +7,7 @@ import Avatar from '../Avatar'
 import { useApp } from '../../context/AppContext'
 import { adminTitles } from '../../data/adminMenu'
 import { usePlatform } from '../../api/adminQueries'
+import { t, tServer } from '../../i18n'
 
 export default function AdminHeader() {
   const { pathname } = useLocation()
@@ -22,29 +23,29 @@ export default function AdminHeader() {
   }, [])
 
   const path = pathname.replace(/\/$/, '') || '/admin'
-  const title = adminTitles[path] || (path.startsWith('/admin/users/') ? 'Kullanıcı Detayı' : 'Admin')
+  const title = adminTitles[path] || (path.startsWith('/admin/users/') ? t('Kullanıcı Detayı') : t('Admin'))
   const halted = platform?.killSwitch?.active
   const maint = platform?.maintenance?.active
 
   return (
     <header className={`hn-header ${scrolled ? 'scrolled' : ''}`}>
-      <button className="hamburger" onClick={toggleSidebar} aria-label="Menüyü aç/kapat"><FiMenu /></button>
+      <button className="hamburger" onClick={toggleSidebar} aria-label={t('Menüyü aç/kapat')}><FiMenu /></button>
       <h1 className="page-title">{title}</h1>
-      <Link to="/admin/risk" className={`chip ${halted ? 'red' : maint ? 'yellow' : 'green'} d-none d-lg-inline-flex`} title="Platform durumu">
+      <Link to="/admin/risk" className={`chip ${halted ? 'red' : maint ? 'yellow' : 'green'} d-none d-lg-inline-flex`} title={t('Platform durumu')}>
         {halted ? <FiAlertOctagon /> : maint ? <FiTool /> : <span className="status-dot green pulse" />}
-        {halted ? 'İşlemler durduruldu' : maint ? 'Bakım modu' : 'Platform aktif'}
+        {halted ? t('İşlemler durduruldu') : maint ? t('Bakım modu') : t('Platform aktif')}
       </Link>
       <div className="ms-auto d-flex align-items-center gap-2 gap-md-3">
         <span className={`chip ${{ super_admin: 'red', risk: 'yellow', support: 'sky', finance: 'green' }[user?.role] || 'gray'} d-none d-sm-inline-flex`}>
-          <FiShield /> {user?.roleLabel}
+          <FiShield /> {tServer(user?.roleLabel)}
         </span>
-        <button className="icon-btn" onClick={toggleTheme} aria-label="Tema değiştir">{theme === 'dark' ? <FiSun /> : <FiMoon />}</button>
+        <button className="icon-btn" onClick={toggleTheme} aria-label={t('Tema değiştir')}>{theme === 'dark' ? <FiSun /> : <FiMoon />}</button>
         <Dropdown
           caret={false}
           toggleClass="user-btn"
           toggle={
             <>
-              <Avatar name={user?.name || 'Admin'} size={44} color="#e8384f" />
+              <Avatar name={user?.name || t('Admin')} size={44} color="#e8384f" />
               <span className="d-none d-md-block">
                 <div className="name">{user?.name}</div>
                 <div className="role">{user?.email}</div>
@@ -52,9 +53,9 @@ export default function AdminHeader() {
             </>
           }
         >
-          <div className="dropdown-item-text fs-13 text-muted">2FA ile giriş yapıldı</div>
+          <div className="dropdown-item-text fs-13 text-muted">{t('2FA ile giriş yapıldı')}</div>
           <button className="dropdown-item d-flex align-items-center gap-2 py-2" data-close onClick={() => setPwOpen(true)}>
-            <FiKey /> Şifre değiştir
+            <FiKey /> {t('Şifre değiştir')}
           </button>
           <hr className="dropdown-divider" />
           <button
@@ -62,11 +63,11 @@ export default function AdminHeader() {
             data-close
             onClick={async () => {
               await signOut()
-              toast('Admin oturumu kapatıldı', 'info')
+              toast(t('Admin oturumu kapatıldı'), 'info')
               navigate('/login')
             }}
           >
-            <FiLogOut /> Çıkış Yap
+            <FiLogOut /> {t('Çıkış Yap')}
           </button>
         </Dropdown>
       </div>

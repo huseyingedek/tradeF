@@ -982,6 +982,14 @@ a {
     position: relative;
     z-index: 2;
   }
+  .auth-lang {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    display: flex;
+    gap: 0.25rem;
+    z-index: 2;
+  }
   .auth-card {
     width: 100%;
     max-width: 500px;

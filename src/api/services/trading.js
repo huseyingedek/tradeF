@@ -23,7 +23,8 @@ export const positionService = {
 
 export const portfolioService = {
   balances: () => http.get('/balances'),
-  summary: () => http.get('/portfolio/summary'),
+  /** mode: 'live' (gerçek para) | 'paper' (sanal) | boş = canlı hesap varsa gerçek, yoksa sanal */
+  summary: (mode) => http.get('/portfolio/summary', mode ? { mode } : undefined),
   /** range: '1D' | '1W' | '1M' | '3M' | '1Y' */
-  history: (range = '1M') => http.get('/portfolio/history', { range }),
+  history: (range = '1M', mode) => http.get('/portfolio/history', mode ? { range, mode } : { range }),
 }

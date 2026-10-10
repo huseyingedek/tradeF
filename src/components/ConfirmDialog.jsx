@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { FiAlertTriangle } from 'react-icons/fi'
 import Modal from './Modal'
 import { useApp } from '../context/AppContext'
+import { t } from '../i18n'
 
 /** AppContext.confirm() ile açılan global onay penceresi */
 export default function ConfirmDialog() {
@@ -30,7 +31,7 @@ export default function ConfirmDialog() {
           {typeof s.message === 'string' ? <p className="mb-0">{s.message}</p> : s.message}
           {s.requireText && (
             <div className="mt-3">
-              <label className="form-label">Onaylamak için <strong>{s.requireText}</strong> yazın</label>
+              <label className="form-label">{t('Onaylamak için')} <strong>{s.requireText}</strong> {t('yazın')}</label>
               <input className="form-control" value={typed} onChange={(e) => setTyped(e.target.value)} autoFocus />
             </div>
           )}

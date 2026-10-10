@@ -11,6 +11,7 @@ import { useTickerVersion, tickerStore } from '../../hooks/useMarket'
 import { useApp } from '../../context/AppContext'
 import { fmtMoney, fmtNum, fmtPct, fmtQty, pnlClass } from '../../utils/format'
 import { positionLive } from '../../utils/trading'
+import { t, pctText } from '../../i18n'
 
 export default function PositionsTable({ positions = [], compact = false, emptyText }) {
   useTickerVersion() // her fiyat güncellemesinde yeniden çiz
@@ -21,15 +22,15 @@ export default function PositionsTable({ positions = [], compact = false, emptyT
 
   const doClose = async (p, percent) => {
     const ok = await confirm({
-      title: `${p.symbol} pozisyonunu kapat`,
-      message: `${lk.exchange[p.exchangeId]?.label} hesabındaki ${fmtQty(p.qty)} ${p.symbol} ${p.side === 'long' ? 'long' : 'short'} pozisyonunun %${percent}'i piyasa fiyatından kapatılacak.`,
-      confirmText: `%${percent} Kapat`,
+      title: t('{0} pozisyonunu kapat', p.symbol),
+      message: t('{0} hesabındaki {1} {2} {3} pozisyonunun %{4}\'i piyasa fiyatından kapatılacak.', lk.exchange[p.exchangeId]?.label, fmtQty(p.qty), p.symbol, p.side === 'long' ? 'long' : 'short', percent),
+      confirmText: t('%{0} Kapat', percent),
       variant: 'danger',
     })
-    if (ok) close.mutate({ id: p.id, percent }, { onSuccess: () => toast(`${p.symbol} pozisyonunun %${percent}'i kapatıldı`) })
+    if (ok) close.mutate({ id: p.id, percent }, { onSuccess: () => toast(t('{0} pozisyonunun %{1}\'i kapatıldı', p.symbol, percent)) })
   }
 
-  if (!positions.length) return <EmptyState title="Açık pozisyon yok" text={emptyText} />
+  if (!positions.length) return <EmptyState title={t('Açık pozisyon yok')} text={emptyText} />
 
   return (
     <>
@@ -37,15 +38,15 @@ export default function PositionsTable({ positions = [], compact = false, emptyT
         <table className="table table-hover table-trading">
           <thead>
             <tr>
-              <th className="ps-4">Sembol</th>
-              {!compact && <th>Hesap</th>}
-              <th>Yön</th>
-              <th className="text-end">Miktar</th>
-              <th className="text-end">Giriş</th>
-              <th className="text-end">Güncel</th>
-              <th className="text-end">K/Z</th>
+              <th className="ps-4">{t('Sembol')}</th>
+              {!compact && <th>{t('Hesap')}</th>}
+              <th>{t('Yön')}</th>
+              <th className="text-end">{t('Miktar')}</th>
+              <th className="text-end">{t('Giriş')}</th>
+              <th className="text-end">{t('Güncel')}</th>
+              <th className="text-end">{t('K/Z')}</th>
               {!compact && <th className="text-end">SL / TP</th>}
-              {!compact && <th className="pe-4 text-end">İşlem</th>}
+              {!compact && <th className="pe-4 text-end">{t('İşlem')}</th>}
             </tr>
           </thead>
           <tbody>
@@ -64,7 +65,7 @@ export default function PositionsTable({ positions = [], compact = false, emptyT
                   <td className="text-end num">{fmtQty(p.qty)}</td>
                   <td className="text-end num">
                     {fmtNum(p.entryPrice)}
-                    {p.liquidationPrice && <div className="fs-12 text-down text-nowrap" title="Fiyat bu seviyeye gelirse pozisyon otomatik kapatılır (teminatın %90'ı kaybedilmiş olur)">Tasfiye {fmtNum(p.liquidationPrice)}</div>}
+                    {p.liquidationPrice && <div className="fs-12 text-down text-nowrap" title={t('Fiyat bu seviyeye gelirse pozisyon otomatik kapatılır (teminatın %90\'ı kaybedilmiş olur)')}>{t('Tasfiye')} {fmtNum(p.liquidationPrice)}</div>}
                   </td>
                   <td className="text-end num"><FlashNumber value={live.mark}>{fmtNum(live.mark)}</FlashNumber></td>
                   <td className={`text-end num ${pnlClass(live.pnl)}`}>
@@ -79,10 +80,10 @@ export default function PositionsTable({ positions = [], compact = false, emptyT
                   )}
                   {!compact && (
                     <td className="pe-4 text-end text-nowrap">
-                      <button className="btn btn-sm btn-soft me-1" onClick={() => setEditing(p)} title="SL/TP düzenle"><FiEdit2 /></button>
-                      <Dropdown className="d-inline-block" caret={false} toggleClass="btn btn-sm btn-outline-danger" toggle={<><FiX /> Kapat</>}>
+                      <button className="btn btn-sm btn-soft me-1" onClick={() => setEditing(p)} title={t('SL/TP düzenle')}><FiEdit2 /></button>
+                      <Dropdown className="d-inline-block" caret={false} toggleClass="btn btn-sm btn-outline-danger" toggle={<><FiX /> {t('Kapat')}</>}>
                         {[25, 50, 100].map((pct) => (
-                          <button key={pct} className="dropdown-item" data-close onClick={() => doClose(p, pct)}>%{pct} kapat</button>
+                          <button key={pct} className="dropdown-item" data-close onClick={() => doClose(p, pct)}>{pctText(pct)} {t('kapat')}</button>
                         ))}
                       </Dropdown>
                     </td>

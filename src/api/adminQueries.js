@@ -3,6 +3,7 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { adminService, announcementService } from './services'
 import { useApiMutation } from './queries'
 import { useApp } from '../context/AppContext'
+import { t } from '../i18n'
 
 export const aqk = {
   overview: ['admin', 'overview'],
@@ -42,18 +43,18 @@ export const useUpdateUser = (opts) => useApiMutation(({ id, ...patch }) => admi
 export const useUserAction = () =>
   useApiMutation(({ id, action, ...rest }) => ({ logoutAll: () => adminService.logoutAll(id), reset2fa: () => adminService.reset2fa(id, rest.reason), resend: () => adminService.resendVerification(id), note: () => adminService.addNote(id, rest.text) })[action](), {
     invalidate: [ADMIN],
-    success: (_, v) => ({ logoutAll: 'Tüm oturumlar sonlandırıldı', reset2fa: '2FA sıfırlandı', resend: 'Doğrulama e-postası gönderildi', note: 'Not eklendi' })[v.action],
+    success: (_, v) => ({ logoutAll: t('Tüm oturumlar sonlandırıldı'), reset2fa: t('2FA sıfırlandı'), resend: t('Doğrulama e-postası gönderildi'), note: t('Not eklendi') })[v.action],
   })
-export const useUpdatePlatform = () => useApiMutation(adminService.updatePlatform, { invalidate: [ADMIN], success: 'Platform ayarları kaydedildi' })
+export const useUpdatePlatform = () => useApiMutation(adminService.updatePlatform, { invalidate: [ADMIN], success: t('Platform ayarları kaydedildi') })
 export const usePlatformKill = () => useApiMutation(({ active, reason }) => adminService.platformKill(active, reason), { invalidate: [ADMIN, ['announcements']] })
 export const useUpdateProvider = () => useApiMutation(({ id, ...patch }) => adminService.updateProvider(id, patch), { invalidate: [ADMIN] })
-export const useSavePlan = (opts) => useApiMutation(adminService.savePlan, { invalidate: [ADMIN], success: (d) => `${d.name} planı kaydedildi`, ...opts })
-export const useDeletePlan = () => useApiMutation(adminService.deletePlan, { invalidate: [ADMIN], success: 'Plan silindi' })
-export const useRefund = (opts) => useApiMutation(({ id, reason }) => adminService.refund(id, reason), { invalidate: [ADMIN], success: 'İade yapıldı', ...opts })
-export const useConfirmPayment = () => useApiMutation(adminService.confirmPayment, { invalidate: [ADMIN], success: 'Ödeme onaylandı, plan aktifleşti' })
-export const useFailPayment = (opts) => useApiMutation(({ id, reason }) => adminService.failPayment(id, reason), { invalidate: [ADMIN], success: 'Ödeme reddedildi', ...opts })
-export const useSaveAnnouncement = (opts) => useApiMutation(adminService.saveAnnouncement, { invalidate: [ADMIN, ['announcements']], success: 'Duyuru kaydedildi', ...opts })
-export const useDeleteAnnouncement = () => useApiMutation(adminService.deleteAnnouncement, { invalidate: [ADMIN, ['announcements']], success: 'Duyuru silindi' })
-export const useInviteAdmin = (opts) => useApiMutation(adminService.invite, { invalidate: [ADMIN], success: (d) => `${d.name} davet edildi`, ...opts })
-export const useUpdateAdmin = () => useApiMutation(({ id, ...patch }) => adminService.updateAdmin(id, patch), { invalidate: [ADMIN], success: 'Admin güncellendi' })
-export const useRemoveAdmin = () => useApiMutation(adminService.removeAdmin, { invalidate: [ADMIN], success: 'Ekipten çıkarıldı' })
+export const useSavePlan = (opts) => useApiMutation(adminService.savePlan, { invalidate: [ADMIN], success: (d) => t('{0} planı kaydedildi', d.name), ...opts })
+export const useDeletePlan = () => useApiMutation(adminService.deletePlan, { invalidate: [ADMIN], success: t('Plan silindi') })
+export const useRefund = (opts) => useApiMutation(({ id, reason }) => adminService.refund(id, reason), { invalidate: [ADMIN], success: t('İade yapıldı'), ...opts })
+export const useConfirmPayment = () => useApiMutation(adminService.confirmPayment, { invalidate: [ADMIN], success: t('Ödeme onaylandı, plan aktifleşti') })
+export const useFailPayment = (opts) => useApiMutation(({ id, reason }) => adminService.failPayment(id, reason), { invalidate: [ADMIN], success: t('Ödeme reddedildi'), ...opts })
+export const useSaveAnnouncement = (opts) => useApiMutation(adminService.saveAnnouncement, { invalidate: [ADMIN, ['announcements']], success: t('Duyuru kaydedildi'), ...opts })
+export const useDeleteAnnouncement = () => useApiMutation(adminService.deleteAnnouncement, { invalidate: [ADMIN, ['announcements']], success: t('Duyuru silindi') })
+export const useInviteAdmin = (opts) => useApiMutation(adminService.invite, { invalidate: [ADMIN], success: (d) => t('{0} davet edildi', d.name), ...opts })
+export const useUpdateAdmin = () => useApiMutation(({ id, ...patch }) => adminService.updateAdmin(id, patch), { invalidate: [ADMIN], success: t('Admin güncellendi') })
+export const useRemoveAdmin = () => useApiMutation(adminService.removeAdmin, { invalidate: [ADMIN], success: t('Ekipten çıkarıldı') })

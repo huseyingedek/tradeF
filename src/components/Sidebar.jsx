@@ -5,6 +5,7 @@ import Logo from './Logo'
 import { menu } from '../data/menu'
 import { useApp } from '../context/AppContext'
 import { useCan } from '../api/adminQueries'
+import { t } from '../i18n'
 
 const YEAR = new Date().getFullYear()
 const groupOf = (items, path) => items.findIndex((m) => m.children?.some((c) => c.to === path))
@@ -94,7 +95,7 @@ export default function Sidebar({ items = menu, home = '/dashboard', badge, foot
       <div className="hn-sidebar-footer">
         {footer || (
           <>
-            <strong>Tradepilo</strong>Çoklu borsa yönetim paneli · © {YEAR}
+            <strong>{t('Tradepilo')}</strong>{t('Çoklu borsa yönetim paneli · ©')} {YEAR}
           </>
         )}
       </div>

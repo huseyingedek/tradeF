@@ -8,6 +8,7 @@ import { useBalances, useLookups, usePortfolioSummary, usePositions } from '../a
 import { tickerStore, useTickerVersion } from '../hooks/useMarket'
 import { fmtMoney, fmtPct, fmtSignedMoney, pnlClass } from '../utils/format'
 import { positionLive } from '../utils/trading'
+import { t } from '../i18n'
 
 const COLORS = ['#8c62ff', '#ff9b52', '#48a9f8', '#1bd084', '#f72b50', '#ffb800', '#20c3b2', '#8bc740', '#6c5ce7', '#e84393']
 
@@ -16,13 +17,19 @@ export default function Portfolio() {
   const lk = useLookups()
   const { data: positions = [] } = usePositions()
   const { data: balances = [] } = useBalances()
-  const { data: summary } = usePortfolioSummary()
+  // gerçek ve sanal para ayrı özetlenir; hesap filtresi: 'live' | 'paper' | hesap id
+  const { data: auto } = usePortfolioSummary()
+  const { data: sLive } = usePortfolioSummary('live')
+  const { data: sPaper } = usePortfolioSummary('paper')
   const [tab, setTab] = useState('positions')
-  const [exFilter, setExFilter] = useState('all')
+  const [exFilter, setExFilter] = useState(null)
+  const filter = exFilter ?? auto?.mode ?? 'paper'
+  const modeOf = (exchangeId) => (lk.exchange[exchangeId]?.mode === 'live' ? 'live' : 'paper')
+  const match = (exchangeId) => (filter === 'live' || filter === 'paper' ? modeOf(exchangeId) === filter : exchangeId === filter)
 
-  const exValue = useMemo(() => Object.fromEntries((summary?.byExchange || []).map((e) => [e.exchangeId, e.value])), [summary])
-  const filteredPositions = positions.filter((p) => exFilter === 'all' || p.exchangeId === exFilter)
-  const filteredBalances = balances.filter((b) => exFilter === 'all' || b.exchangeId === exFilter)
+  const exValue = useMemo(() => Object.fromEntries([...(sLive?.byExchange || []), ...(sPaper?.byExchange || [])].map((e) => [e.exchangeId, e.value])), [sLive, sPaper])
+  const filteredPositions = positions.filter((p) => match(p.exchangeId))
+  const filteredBalances = balances.filter((b) => match(b.exchangeId))
 
   // Varlık bazında dağılım (USD)
   const usdRate = tickerStore.get('USD/TRY')?.last || 1
@@ -42,13 +49,21 @@ export default function Portfolio() {
   return (
     <>
       <div className="exchange-strip mb-4">
-        <button className={`ex-chip ${exFilter === 'all' ? 'active' : ''}`} onClick={() => setExFilter('all')}>
-          <span className="fw-semibold">Tüm Hesaplar</span>
-          <span className="num">{fmtMoney(summary?.totalValue, 'USD', 0)}</span>
-        </button>
+        {auto?.hasLive && (
+          <button className={`ex-chip ${filter === 'live' ? 'active' : ''}`} onClick={() => setExFilter('live')}>
+            <span className="fw-semibold">{t('Gerçek hesaplar')}</span>
+            <span className="num">{fmtMoney(sLive?.totalValue, 'USD', 0)}</span>
+          </button>
+        )}
+        {(auto?.hasPaper || !auto?.hasLive) && (
+          <button className={`ex-chip ${filter === 'paper' ? 'active' : ''}`} onClick={() => setExFilter('paper')}>
+            <span className="fw-semibold">{t('Sanal hesaplar')}</span>
+            <span className="num">{fmtMoney(sPaper?.totalValue, 'USD', 0)}</span>
+          </button>
+        )}
         {lk.exchanges.map((e) => (
-          <button key={e.id} className={`ex-chip ${exFilter === e.id ? 'active' : ''}`} onClick={() => setExFilter(e.id)}>
-            <span className="d-flex align-items-center gap-2"><ExchangeLogo provider={lk.provider[e.provider]} size={22} /><span className="fw-semibold text-truncate">{e.label}</span></span>
+          <button key={e.id} className={`ex-chip ${filter === e.id ? 'active' : ''}`} onClick={() => setExFilter(e.id)}>
+            <span className="d-flex align-items-center gap-2"><ExchangeLogo provider={lk.provider[e.provider]} size={22} /><span className="fw-semibold text-truncate">{e.label}</span><span className={`chip ${e.mode === 'live' ? 'green' : 'gray'}`} style={{ fontSize: 10, padding: '1px 6px' }}>{e.mode === 'live' ? t('Gerçek') : t('Sanal')}</span></span>
             <span className="d-flex align-items-center justify-content-between gap-2">
               <span className="num">{fmtMoney(exValue[e.id] || 0, 'USD', 0)}</span>
               {e.status !== 'connected' || e.paused ? <StatusBadge status={e.paused ? 'paused' : e.status} /> : null}
@@ -60,23 +75,23 @@ export default function Portfolio() {
       <div className="row">
         <div className="col-12">
           <Card
-            title={<Segmented options={[{ value: 'positions', label: `Pozisyonlar (${filteredPositions.length})` }, { value: 'balances', label: `Nakit Bakiyeler (${filteredBalances.length})` }]} value={tab} onChange={setTab} />}
-            actions={tab === 'positions' && <span className={`fw-semibold ${pnlClass(unrealized)}`}>Gerçekleşmemiş K/Z: {fmtSignedMoney(unrealized)}</span>}
+            title={<Segmented options={[{ value: 'positions', label: t('Pozisyonlar ({0})', filteredPositions.length) }, { value: 'balances', label: t('Nakit Bakiyeler ({0})', filteredBalances.length) }]} value={tab} onChange={setTab} />}
+            actions={tab === 'positions' && <span className={`fw-semibold ${pnlClass(unrealized)}`}>{t('Gerçekleşmemiş K/Z:')} {fmtSignedMoney(unrealized)}</span>}
             bodyClass="px-0 pb-2"
           >
             {tab === 'positions' ? (
-              <PositionsTable positions={filteredPositions} emptyText="İşlem Terminali'nden ilk emrinizi verebilirsiniz." />
+              <PositionsTable positions={filteredPositions} emptyText={t('İşlem Terminali\'nden ilk emrinizi verebilirsiniz.')} />
             ) : (
               <div className="table-responsive">
                 <table className="table table-hover table-trading">
                   <thead>
                     <tr>
-                      <th className="ps-4">Hesap</th>
-                      <th>Varlık</th>
-                      <th className="text-end">Toplam</th>
-                      <th className="text-end">Emirlerde</th>
-                      <th className="text-end">Kullanılabilir</th>
-                      <th className="pe-4 text-end">USD Karşılığı</th>
+                      <th className="ps-4">{t('Hesap')}</th>
+                      <th>{t('Varlık')}</th>
+                      <th className="text-end">{t('Toplam')}</th>
+                      <th className="text-end">{t('Emirlerde')}</th>
+                      <th className="text-end">{t('Kullanılabilir')}</th>
+                      <th className="pe-4 text-end">{t('USD Karşılığı')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -97,7 +112,7 @@ export default function Portfolio() {
           </Card>
         </div>
         <div className="col-12">
-          <Card title="Varlık Bazında Dağılım">
+          <Card title={t('Varlık Bazında Dağılım')}>
             <div className="row align-items-center">
             <div className="col-lg-5">
             <Chart
@@ -110,7 +125,7 @@ export default function Portfolio() {
                 legend: { show: false },
                 stroke: { width: 0 },
                 dataLabels: { enabled: false },
-                plotOptions: { pie: { donut: { size: '70%', labels: { show: true, total: { show: true, label: 'Toplam', formatter: () => fmtMoney(total, 'USD', 0) } } } } },
+                plotOptions: { pie: { donut: { size: '70%', labels: { show: true, total: { show: true, label: t('Toplam'), formatter: () => fmtMoney(total, 'USD', 0) } } } } },
                 tooltip: { y: { formatter: (v) => fmtMoney(v, 'USD', 0) } },
               }}
             />

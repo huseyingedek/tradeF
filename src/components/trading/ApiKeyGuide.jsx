@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { FiChevronDown, FiChevronUp, FiExternalLink, FiHelpCircle } from 'react-icons/fi'
 import { API_KEY_GUIDES } from '../../data/apiKeyGuides'
+import { t, tServer } from '../../i18n'
 
 // **kalın** işaretlerini <strong>'a çevirir
 const rich = (text) => text.split(/(\*\*[^*]+\*\*)/g).map((part, i) => (part.startsWith('**') ? <strong key={i}>{part.slice(2, -2)}</strong> : part))
@@ -13,7 +14,7 @@ export default function ApiKeyGuide({ provider }) {
   return (
     <div className="api-guide mb-3">
       <button type="button" className="api-guide-toggle" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
-        <FiHelpCircle /> {provider.name} için bu anahtarları nasıl alırım? {open ? <FiChevronUp /> : <FiChevronDown />}
+        <FiHelpCircle /> {t('{0} için bu anahtarları nasıl alırım?', tServer(provider.name))} {open ? <FiChevronUp /> : <FiChevronDown />}
       </button>
       {open && (
         <div className="api-guide-body">
@@ -25,7 +26,7 @@ export default function ApiKeyGuide({ provider }) {
               {guide.urlLabel} <FiExternalLink />
             </a>
           )}
-          <div className="fs-12 text-muted mt-1">Menü adları borsanın güncellemelerine göre küçük farklılıklar gösterebilir.</div>
+          <div className="fs-12 text-muted mt-1">{t('Menü adları borsanın güncellemelerine göre küçük farklılıklar gösterebilir.')}</div>
         </div>
       )}
     </div>

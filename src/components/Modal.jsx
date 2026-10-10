@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { FiX } from 'react-icons/fi'
+import { t } from '../i18n'
 
 /** Bootstrap JS gerektirmeyen modal */
 export default function Modal({ title, onClose, children, footer, size = '', onSubmit }) {
@@ -25,7 +26,7 @@ export default function Modal({ title, onClose, children, footer, size = '', onS
           >
             <div className="modal-header border-0 px-4 pt-4 pb-2">
               <h5 className="modal-title">{title}</h5>
-              <button type="button" className="btn btn-sm btn-soft ms-auto" onClick={onClose} aria-label="Kapat"><FiX /></button>
+              <button type="button" className="btn btn-sm btn-soft ms-auto" onClick={onClose} aria-label={t('Kapat')}><FiX /></button>
             </div>
             <div className="modal-body px-4">{children}</div>
             {footer && <div className="modal-footer border-0 px-4 pb-4">{footer}</div>}

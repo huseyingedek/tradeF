@@ -13,6 +13,7 @@ import { useActiveAnnouncements } from '../api/adminQueries'
 import { useProviders } from '../api/queries'
 import { useQuery } from '@tanstack/react-query'
 import { metaService } from '../api/services'
+import { t, tServer } from '../i18n'
 
 function LiveData() {
   useTickerFeed()
@@ -49,16 +50,16 @@ function PlatformNotices() {
   return (
     <>
       {p.tradingHalted && (
-        <div className="kill-banner"><FiAlertOctagon size={20} /><span><strong>Platform genelinde işlemler geçici olarak durduruldu.</strong> {p.haltReason}. Zarar-kes / kâr-al korumalarınız çalışmaya devam ediyor.</span></div>
+        <div className="kill-banner"><FiAlertOctagon size={20} /><span><strong>{t('Platform genelinde işlemler geçici olarak durduruldu.')}</strong> {tServer(p.haltReason)}{t('. Zarar-kes / kâr-al korumalarınız çalışmaya devam ediyor.')}</span></div>
       )}
       {data.account?.status === 'trading_halted' && (
-        <div className="kill-banner"><FiAlertOctagon size={20} /><span><strong>Hesabınızda işlemler durduruldu.</strong> Ayrıntı için destek ekibiyle iletişime geçin.</span></div>
+        <div className="kill-banner"><FiAlertOctagon size={20} /><span><strong>{t('Hesabınızda işlemler durduruldu.')}</strong> {t('Ayrıntı için destek ekibiyle iletişime geçin.')}</span></div>
       )}
-      {p.maintenance?.active && <AnnouncementBanner a={{ level: 'maintenance', title: 'Bakım modu:', message: p.maintenance.message || 'Emir girişi geçici olarak kapalı.' }} />}
-      {halted.length > 0 && <AnnouncementBanner a={{ level: 'warning', title: `${halted.join(', ')}:`, message: 'Bu platformda işlemler yönetici tarafından geçici olarak durduruldu.' }} />}
+      {p.maintenance?.active && <AnnouncementBanner a={{ level: 'maintenance', title: t('Bakım modu:'), message: p.maintenance.message || t('Emir girişi geçici olarak kapalı.') }} />}
+      {halted.length > 0 && <AnnouncementBanner a={{ level: 'warning', title: `${halted.join(', ')}:`, message: t('Bu platformda işlemler yönetici tarafından geçici olarak durduruldu.') }} />}
       {meta && !meta.liveTradingEnabled && !dismissed.includes('paper-mode') && (
         <AnnouncementBanner
-          a={{ level: 'info', title: 'Deneme modu:', message: 'Tüm işlemler sanal (paper) bakiye ile yapılır; gerçek para kullanılmaz ve borsaya gerçek emir gönderilmez. Kripto fiyatları gerçek, BIST ve forex fiyatları simülasyondur.' }}
+          a={{ level: 'info', title: t('Deneme modu:'), message: t('Tüm işlemler sanal (paper) bakiye ile yapılır; gerçek para kullanılmaz ve borsaya gerçek emir gönderilmez. Kripto fiyatları gerçek, BIST ve forex fiyatları simülasyondur.') }}
           onDismiss={() => dismiss('paper-mode')}
         />
       )}
@@ -76,9 +77,9 @@ function KillBanner() {
     <div className="kill-banner">
       <FiAlertOctagon size={20} />
       <span>
-        <strong>Acil durdurma aktif.</strong> {risk.killSwitch.reason} · {timeAgo(risk.killSwitch.at)}. Yeni emir, bot ve kural işlemleri engellendi.
+        <strong>{t('Acil durdurma aktif.')}</strong> {tServer(risk.killSwitch.reason)} · {timeAgo(risk.killSwitch.at)}{t('. Yeni emir, bot ve kural işlemleri engellendi.')}
       </span>
-      <Link to="/risk" className="ms-auto fw-semibold">Risk paneline git →</Link>
+      <Link to="/risk" className="ms-auto fw-semibold">{t('Risk paneline git →')}</Link>
     </div>
   )
 }
@@ -105,7 +106,7 @@ export default function AdminLayout() {
           </Suspense>
         </main>
         <footer className="hn-footer">
-          Tradepilo · Yatırım tavsiyesi değildir. Otomatik işlemler risk içerir.
+          {t('Tradepilo · Yatırım tavsiyesi değildir. Otomatik işlemler risk içerir.')}
         </footer>
       </div>
     </div>

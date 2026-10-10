@@ -1,5 +1,6 @@
 import ReactApexChart from 'react-apexcharts'
 import { useApp } from '../context/AppContext'
+import { t } from '../i18n'
 
 // ApexCharts sarmalayıcısı: tema renklerini otomatik uygular
 export default function Chart({ options = {}, ...props }) {

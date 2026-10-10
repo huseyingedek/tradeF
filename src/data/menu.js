@@ -1,44 +1,45 @@
 import { FiGrid, FiActivity, FiTrendingUp, FiBriefcase, FiCpu, FiShield, FiLink, FiList, FiSettings } from 'react-icons/fi'
+import { t } from '../i18n'
 
 // Sidebar menü yapısı
 export const menu = [
-  { title: 'İşlem' },
-  { label: 'Genel Bakış', icon: FiGrid, to: '/dashboard' },
-  { label: 'Piyasalar', icon: FiActivity, to: '/markets' },
-  { label: 'İşlem Terminali', icon: FiTrendingUp, to: '/trade' },
+  { title: t('İşlem@@menü') },
+  { label: t('Genel Bakış'), icon: FiGrid, to: '/dashboard' },
+  { label: t('Piyasalar'), icon: FiActivity, to: '/markets' },
+  { label: t('İşlem Terminali'), icon: FiTrendingUp, to: '/trade' },
   {
-    label: 'Portföy',
+    label: t('Portföy'),
     icon: FiBriefcase,
     children: [
-      { label: 'Varlıklar & Pozisyonlar', to: '/portfolio' },
-      { label: 'Emirler', to: '/orders' },
+      { label: t('Varlıklar & Pozisyonlar'), to: '/portfolio' },
+      { label: t('Emirler'), to: '/orders' },
     ],
   },
   {
-    label: 'Otomasyon',
+    label: t('Otomasyon'),
     icon: FiCpu,
     children: [
-      { label: 'Kurallar & Alarmlar', to: '/automation' },
-      { label: 'Botlar', to: '/bots' },
+      { label: t('Kurallar & Alarmlar'), to: '/automation' },
+      { label: t('Botlar'), to: '/bots' },
     ],
   },
-  { label: 'Risk Yönetimi', icon: FiShield, to: '/risk' },
-  { title: 'Yönetim' },
-  { label: 'Borsa Bağlantıları', icon: FiLink, to: '/exchanges' },
-  { label: 'İşlem Günlüğü', icon: FiList, to: '/activity' },
-  { label: 'Ayarlar', icon: FiSettings, to: '/settings' },
+  { label: t('Risk Yönetimi'), icon: FiShield, to: '/risk' },
+  { title: t('Yönetim') },
+  { label: t('Borsa Bağlantıları'), icon: FiLink, to: '/exchanges' },
+  { label: t('İşlem Günlüğü'), icon: FiList, to: '/activity' },
+  { label: t('Ayarlar'), icon: FiSettings, to: '/settings' },
 ]
 
 export const pageTitles = {
-  '/dashboard': 'Genel Bakış',
-  '/markets': 'Piyasalar',
-  '/trade': 'İşlem Terminali',
-  '/portfolio': 'Portföy',
-  '/orders': 'Emirler',
-  '/automation': 'Kurallar & Alarmlar',
-  '/bots': 'Botlar',
-  '/risk': 'Risk Yönetimi',
-  '/exchanges': 'Borsa Bağlantıları',
-  '/activity': 'İşlem Günlüğü',
-  '/settings': 'Ayarlar',
+  '/dashboard': t('Genel Bakış'),
+  '/markets': t('Piyasalar'),
+  '/trade': t('İşlem Terminali'),
+  '/portfolio': t('Portföy'),
+  '/orders': t('Emirler'),
+  '/automation': t('Kurallar & Alarmlar'),
+  '/bots': t('Botlar'),
+  '/risk': t('Risk Yönetimi'),
+  '/exchanges': t('Borsa Bağlantıları'),
+  '/activity': t('İşlem Günlüğü'),
+  '/settings': t('Ayarlar'),
 }

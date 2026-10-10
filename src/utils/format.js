@@ -1,13 +1,23 @@
 // Sayı / para / zaman biçimlendirme yardımcıları (tr-TR)
+import { getLocale } from '../i18n'
 
 const CURRENCY_SYMBOL = { USD: '$', USDT: '$', USDC: '$', TRY: '₺', EUR: '€', GBP: '£' }
 export const currencySymbol = (c) => CURRENCY_SYMBOL[c] ?? ''
 
 const nf = new Map()
 const getNf = (min, max) => {
-  const key = `${min}-${max}`
-  if (!nf.has(key)) nf.set(key, new Intl.NumberFormat('tr-TR', { minimumFractionDigits: min, maximumFractionDigits: max }))
+  const loc = getLocale()
+  const key = `${loc}-${min}-${max}`
+  if (!nf.has(key)) nf.set(key, new Intl.NumberFormat(loc, { minimumFractionDigits: min, maximumFractionDigits: max }))
   return nf.get(key)
+}
+
+/** Adım (0.01, 1e-8, 0.5…) → ondalık basamak sayısı. "1e-8" gibi üslü yazımı da doğru çözer. */
+export function stepDecimals(step) {
+  const s = String(step).toLowerCase()
+  const [mant, exp] = s.split('e')
+  const mantDec = mant.includes('.') ? mant.split('.')[1].length : 0
+  return Math.max(0, mantDec - (exp ? +exp : 0))
 }
 
 /** Fiyat: büyüklüğe göre ondalık sayısını otomatik seçer */
@@ -66,11 +76,11 @@ export function fmtCompact(v) {
 }
 
 export function fmtTime(ts) {
-  return new Date(ts).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+  return new Date(ts).toLocaleTimeString(getLocale(), { hour: '2-digit', minute: '2-digit', second: '2-digit' })
 }
 
 export function fmtDateTime(ts) {
-  return new Date(ts).toLocaleString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+  return new Date(ts).toLocaleString(getLocale(), { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
 }
 
 export function timeAgo(ts) {

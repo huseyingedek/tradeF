@@ -1,16 +1,17 @@
+import { t, tServer } from '../i18n'
 // Küçük durum / etiket bileşenleri
 const STATUS = {
-  connected: ['green', 'Bağlı'],
-  error: ['red', 'Hata'],
-  disconnected: ['gray', 'Bağlı değil'],
-  paused: ['yellow', 'Duraklatıldı'],
-  running: ['green', 'Çalışıyor'],
-  stopped: ['gray', 'Durduruldu'],
-  open: ['sky', 'Açık'],
-  filled: ['green', 'Gerçekleşti'],
-  canceled: ['gray', 'İptal'],
-  rejected: ['red', 'Reddedildi'],
-  partially_filled: ['yellow', 'Kısmi'],
+  connected: ['green', t('Bağlı')],
+  error: ['red', t('Hata')],
+  disconnected: ['gray', t('Bağlı değil')],
+  paused: ['yellow', t('Duraklatıldı')],
+  running: ['green', t('Çalışıyor')],
+  stopped: ['gray', t('Durduruldu')],
+  open: ['sky', t('Açık')],
+  filled: ['green', t('Gerçekleşti')],
+  canceled: ['gray', t('İptal')],
+  rejected: ['red', t('Reddedildi')],
+  partially_filled: ['yellow', t('Kısmi')],
 }
 
 export function StatusBadge({ status, label }) {
@@ -23,13 +24,13 @@ export function StatusBadge({ status, label }) {
   )
 }
 
-export const MARKET_LABEL = { crypto: 'Kripto', bist: 'BIST', forex: 'Forex' }
+export const MARKET_LABEL = { crypto: t('Kripto'), bist: 'BIST', forex: t('Forex') }
 export function MarketBadge({ market }) {
   const c = { crypto: 'orange', bist: 'red', forex: 'sky' }[market] || 'gray'
   return <span className={`chip ${c}`}>{MARKET_LABEL[market] || market}</span>
 }
 
-export const SOURCE_LABEL = { manual: 'Manuel', rule: 'Kural', bot: 'Bot', system: 'Sistem', risk: 'Risk' }
+export const SOURCE_LABEL = { manual: t('Manuel'), rule: t('Kural'), bot: t('Bot'), system: t('Sistem'), risk: t('Risk') }
 export function SourceBadge({ source }) {
   const c = { manual: 'gray', rule: '', bot: 'sky', system: 'yellow', risk: 'red' }[source] ?? 'gray'
   return <span className={`chip ${c}`}>{SOURCE_LABEL[source] || source}</span>
@@ -37,7 +38,7 @@ export function SourceBadge({ source }) {
 
 export function SideBadge({ side }) {
   const long = side === 'buy' || side === 'long'
-  const text = { buy: 'Alış', sell: 'Satış', long: 'Long', short: 'Short' }[side]
+  const text = { buy: t('Alış'), sell: t('Satış'), long: t('Long'), short: t('Short') }[side]
   return <span className={`chip ${long ? 'green' : 'red'}`}>{text}</span>
 }
 
@@ -46,7 +47,7 @@ export function ExchangeLogo({ provider, size = 36 }) {
   if (!provider) return <span className="ex-logo" style={{ width: size, height: size }} />
   const initials = provider.name.split(' ').map((w) => w[0]).join('').slice(0, 2)
   return (
-    <span className="ex-logo" style={{ width: size, height: size, background: provider.color, color: provider.textColor, fontSize: size * 0.36 }} title={provider.name}>
+    <span className="ex-logo" style={{ width: size, height: size, background: provider.color, color: provider.textColor, fontSize: size * 0.36 }} title={tServer(provider.name)}>
       {initials}
     </span>
   )

@@ -1,5 +1,6 @@
 import { FaFacebookF, FaXTwitter, FaLinkedinIn } from 'react-icons/fa6'
 import Logo from '../components/Logo'
+import LanguageSelect from '../components/LanguageSelect'
 
 // Sağ taraftaki dekoratif alan – tamamen SVG ile çizilmiştir (harici görsel yok)
 function ArtBackground() {
@@ -43,6 +44,9 @@ export default function AuthLayout({ children, title, subtitle }) {
   return (
     <div className="auth-page">
       <div className="auth-form-side">
+        <div style={{ position: 'absolute', top: 16, right: 16 }}>
+          <LanguageSelect className="form-select form-select-sm" compact />
+        </div>
         <div className="auth-card">{children}</div>
       </div>
       <div className="auth-art-side">

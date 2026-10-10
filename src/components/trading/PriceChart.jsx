@@ -3,6 +3,7 @@ import { CandlestickSeries, HistogramSeries, createChart, CrosshairMode } from '
 import { marketService } from '../../api/services'
 import { realtime } from '../../api/realtime'
 import { useApp } from '../../context/AppContext'
+import { getLocale } from '../../i18n'
 
 const TZ = -new Date().getTimezoneOffset() * 60 // grafiği yerel saatte göstermek için kaydırma
 const UP = '#1bd084'
@@ -29,7 +30,7 @@ export default function PriceChart({ symbol, interval = '1h', height = 440, line
       rightPriceScale: { borderColor: dark ? '#2f2d3b' : '#ececf3' },
       timeScale: { borderColor: dark ? '#2f2d3b' : '#ececf3', timeVisible: true, secondsVisible: false },
       crosshair: { mode: CrosshairMode.Normal },
-      localization: { locale: 'tr-TR' },
+      localization: { locale: getLocale() },
     })
     const series = chart.addSeries(CandlestickSeries, {
       upColor: UP, downColor: DOWN, borderVisible: false, wickUpColor: UP, wickDownColor: DOWN,

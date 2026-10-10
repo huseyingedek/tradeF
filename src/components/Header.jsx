@@ -9,15 +9,16 @@ import { pageTitles } from '../data/menu'
 import { useActivity, useInstruments } from '../api/queries'
 import { useRealtimeStatus } from '../hooks/useMarket'
 import { timeAgo } from '../utils/format'
+import { t as tr, locale, tServer } from '../i18n'
 
 const STATUS = {
-  mock: ['yellow', 'Demo veri'],
-  open: ['green', 'Canlı'],
-  connecting: ['yellow', 'Bağlanıyor'],
-  reconnecting: ['yellow', 'Yeniden bağlanıyor'],
-  closed: ['red', 'Bağlantı yok'],
-  disabled: ['gray', 'Canlı veri kapalı'],
-  idle: ['gray', 'Bekleniyor'],
+  mock: ['yellow', tr('Demo veri')],
+  open: ['green', tr('Canlı')],
+  connecting: ['yellow', tr('Bağlanıyor')],
+  reconnecting: ['yellow', tr('Yeniden bağlanıyor')],
+  closed: ['red', tr('Bağlantı yok')],
+  disabled: ['gray', tr('Canlı veri kapalı')],
+  idle: ['gray', tr('Bekleniyor')],
 }
 
 function SymbolSearch() {
@@ -26,9 +27,11 @@ function SymbolSearch() {
   const [q, setQ] = useState('')
   const [focus, setFocus] = useState(false)
   const results = useMemo(() => {
-    const t = q.trim().toLocaleUpperCase('tr-TR')
+    const raw = q.trim()
+    const t = raw.toUpperCase() // semboller ASCII: "link" → "LINK" (Türkçe büyük harf "LİNK" eşleşmezdi)
+    const tn = raw.toLocaleUpperCase(locale)
     if (!t) return []
-    return instruments.filter((i) => i.symbol.includes(t) || i.name.toLocaleUpperCase('tr-TR').includes(t)).slice(0, 7)
+    return instruments.filter((i) => i.symbol.includes(t) || i.name.toLocaleUpperCase(locale).includes(tn)).sort((a, b) => (b.symbol.startsWith(t) ? 1 : 0) - (a.symbol.startsWith(t) ? 1 : 0)).slice(0, 7)
   }, [q, instruments])
   const go = (symbol) => {
     setQ('')
@@ -42,7 +45,7 @@ function SymbolSearch() {
         if (results[0]) go(results[0].symbol)
       }}
     >
-      <input className="form-control" placeholder="Sembol ara (BTC, THYAO…)" value={q} onChange={(e) => setQ(e.target.value)} onFocus={() => setFocus(true)} onBlur={() => setTimeout(() => setFocus(false), 150)} />
+      <input className="form-control" placeholder={tr('Sembol ara (BTC, THYAO…)')} value={q} onChange={(e) => setQ(e.target.value)} onFocus={() => setFocus(true)} onBlur={() => setTimeout(() => setFocus(false), 150)} />
       <FiSearch />
       {focus && results.length > 0 && (
         <div className="dropdown-menu show w-100" style={{ top: 'calc(100% + 6px)' }}>
@@ -77,11 +80,11 @@ export default function Header() {
 
   return (
     <header className={`hn-header ${scrolled ? 'scrolled' : ''}`}>
-      <button className="hamburger" onClick={toggleSidebar} aria-label="Menüyü aç/kapat">
+      <button className="hamburger" onClick={toggleSidebar} aria-label={tr('Menüyü aç/kapat')}>
         <FiMenu />
       </button>
-      <h1 className="page-title">{pageTitles[pathname] || 'Tradepilo'}</h1>
-      <span className={`chip ${color} d-none d-lg-inline-flex`} title="Gerçek zamanlı veri bağlantısı">
+      <h1 className="page-title">{pageTitles[pathname] || tr('Tradepilo')}</h1>
+      <span className={`chip ${color} d-none d-lg-inline-flex`} title={tr('Gerçek zamanlı veri bağlantısı')}>
         <span className={`status-dot ${color} ${rt === 'open' || rt === 'mock' ? 'pulse' : ''}`} /> {label}
       </span>
 
@@ -89,7 +92,7 @@ export default function Header() {
         <SymbolSearch />
         <KillSwitchButton />
 
-        <button className="icon-btn d-none d-sm-inline-flex" onClick={toggleTheme} aria-label="Tema değiştir" title="Tema değiştir">
+        <button className="icon-btn d-none d-sm-inline-flex" onClick={toggleTheme} aria-label={tr('Tema değiştir')} title={tr('Tema değiştir')}>
           {theme === 'dark' ? <FiSun /> : <FiMoon />}
         </button>
 
@@ -105,21 +108,21 @@ export default function Header() {
           }
         >
           <div className="panel-head d-flex justify-content-between">
-            Bildirimler
-            <button className="btn btn-link btn-sm p-0" data-close onClick={() => navigate('/activity')}>Tümü</button>
+            {tr('Bildirimler')}
+            <button className="btn btn-link btn-sm p-0" data-close onClick={() => navigate('/activity')}>{tr('Tümü')}</button>
           </div>
           {alerts.length ? (
             alerts.map((n) => (
               <div className="panel-item" key={n.id}>
                 <span className={`status-dot mt-1 ${{ danger: 'red', warning: 'yellow', success: 'green' }[n.level] || 'sky'}`} />
                 <div>
-                  <div>{n.message}</div>
+                  <div>{tServer(n.message)}</div>
                   <small className="text-muted">{timeAgo(n.ts)}</small>
                 </div>
               </div>
             ))
           ) : (
-            <div className="panel-item text-muted">Yeni bildirim yok</div>
+            <div className="panel-item text-muted">{tr('Yeni bildirim yok')}</div>
           )}
         </Dropdown>
 
@@ -128,22 +131,22 @@ export default function Header() {
           toggleClass="user-btn"
           toggle={
             <>
-              <Avatar name={user?.name || 'Kullanıcı'} size={44} color="#40189d" />
+              <Avatar name={user?.name || tr('Kullanıcı')} size={44} color="#40189d" />
               <span className="d-none d-md-block">
                 <div className="name">{user?.name}</div>
-                <div className="role">{user?.plan?.name ? `${user.plan.name} plan` : user?.roleLabel || 'Yatırımcı'}</div>
+                <div className="role">{user?.plan?.name ? tr('{0} plan', tServer(user.plan.name)) : tServer(user?.roleLabel) || tr('Yatırımcı')}</div>
               </span>
             </>
           }
         >
           <button className="dropdown-item d-flex align-items-center gap-2 py-2" data-close onClick={() => navigate('/exchanges')}>
-            <FiLink /> Borsa Bağlantıları
+            <FiLink /> {tr('Borsa Bağlantıları')}
           </button>
           <button className="dropdown-item d-flex align-items-center gap-2 py-2" data-close onClick={() => navigate('/settings')}>
-            <FiSettings /> Ayarlar
+            <FiSettings /> {tr('Ayarlar')}
           </button>
           <button className="dropdown-item d-flex align-items-center gap-2 py-2 d-sm-none" data-close onClick={toggleTheme}>
-            {theme === 'dark' ? <FiSun /> : <FiMoon />} Tema
+            {theme === 'dark' ? <FiSun /> : <FiMoon />} {tr('Tema')}
           </button>
           <hr className="dropdown-divider" />
           <button
@@ -151,11 +154,11 @@ export default function Header() {
             data-close
             onClick={async () => {
               await signOut()
-              toast('Çıkış yapıldı', 'info')
+              toast(tr('Çıkış yapıldı'), 'info')
               navigate('/login')
             }}
           >
-            <FiLogOut /> Çıkış Yap
+            <FiLogOut /> {tr('Çıkış Yap')}
           </button>
         </Dropdown>
       </div>

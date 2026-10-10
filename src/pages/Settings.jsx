@@ -12,8 +12,10 @@ import { config } from '../api/config'
 import { useRealtimeStatus } from '../hooks/useMarket'
 import PasswordModal from '../components/PasswordModal'
 import { fmtDateTime } from '../utils/format'
+import { getLocale, t } from '../i18n'
+import LanguageSelect from '../components/LanguageSelect'
 
-const tl = (v) => `₺${Number(v || 0).toLocaleString('tr-TR')}`
+const tl = (v) => `₺${Number(v || 0).toLocaleString(getLocale())}`
 const PAY_STATUS = { pending: ['yellow', 'Onay bekliyor'], paid: ['green', 'Ödendi'], failed: ['red', 'Başarısız'], refunded: ['gray', 'İade'] }
 
 // ---------------------------------------------------------------- 2FA
@@ -71,7 +73,9 @@ function DeleteAccountModal({ me, onClose }) {
   const [confirmText, setConfirmText] = useState('')
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
-  const ok = confirmText.trim().toLocaleUpperCase('tr-TR') === 'SİL' && password && (!me.twoFactor || /^\d{6}$/.test(code))
+  // onay kelimesi seçili dilde gösterilir (SİL / DELETE / LÖSCHEN…); ikisi de kabul edilir
+  const word = confirmText.trim().toLocaleUpperCase(getLocale())
+  const ok = (word === 'SİL' || word === t('SİL').toLocaleUpperCase(getLocale())) && password && (!me.twoFactor || /^\d{6}$/.test(code))
   const submit = async () => {
     if (!ok) return
     setLoading(true)
@@ -222,6 +226,10 @@ export default function Settings() {
                   <option value="dark">Koyu</option>
                   <option value="light">Açık</option>
                 </select>
+              </div>
+              <div className="col-md-6 mb-3">
+                <label className="form-label">Dil / Language</label>
+                <LanguageSelect />
               </div>
             </div>
           </Card>

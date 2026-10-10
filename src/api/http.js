@@ -5,6 +5,7 @@
 // =====================================================================
 import { config } from './config'
 import { tokenStore } from './tokenStore'
+import { t, lang, tServer } from '../i18n'
 
 export class ApiError extends Error {
   constructor(message, { status = 0, code, details } = {}) {
@@ -34,7 +35,7 @@ export async function request(method, path, { query, body, signal } = {}) {
       const { mockRequest } = await loadMock()
       return await mockRequest(method, path, { query: Object.fromEntries(Object.entries(query || {}).filter(([, v]) => v !== undefined && v !== null && v !== '')), body, token: tokenStore.get() })
     } catch (e) {
-      throw new ApiError(e.message || 'Mock hata', { status: e.status || 500, code: e.code })
+      throw new ApiError(e.message || t('Mock hata'), { status: e.status || 500, code: e.code })
     }
   }
 
@@ -49,6 +50,7 @@ export async function request(method, path, { query, body, signal } = {}) {
       method,
       headers: {
         Accept: 'application/json',
+        'Accept-Language': lang,
         ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}),
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
@@ -56,7 +58,7 @@ export async function request(method, path, { query, body, signal } = {}) {
       signal: controller.signal,
     })
   } catch (e) {
-    throw new ApiError(e.name === 'AbortError' ? 'İstek zaman aşımına uğradı' : 'Sunucuya ulaşılamıyor', { status: 0 })
+    throw new ApiError(e.name === 'AbortError' ? t('İstek zaman aşımına uğradı') : t('Sunucuya ulaşılamıyor'), { status: 0 })
   } finally {
     clearTimeout(timer)
   }
@@ -72,7 +74,7 @@ export async function request(method, path, { query, body, signal } = {}) {
   if (!res.ok) {
     if (res.status === 401) onUnauthorized()
     // Backend hata gövdesi: { message, code, details } bekleniyor (bkz. docs/API.md)
-    throw new ApiError(data?.message || data?.error || `İstek başarısız (${res.status})`, { status: res.status, code: data?.code, details: data?.details })
+    throw new ApiError(tServer(data?.message) || data?.error || t('İstek başarısız ({0})', res.status), { status: res.status, code: data?.code, details: data?.details })
   }
   // Backend { data: ... } zarfı kullanıyorsa aç
   return data && typeof data === 'object' && 'data' in data && Object.keys(data).length <= 3 ? data.data : data

@@ -8,6 +8,7 @@ import { useApp } from '../context/AppContext'
 import { useCancelAll, useLookups, useOrders } from '../api/queries'
 import { ORDER_TYPE_LABEL } from '../utils/trading'
 import { fmtDateTime } from '../utils/format'
+import { t } from '../i18n'
 
 const PER_PAGE = 15
 
@@ -35,7 +36,7 @@ export default function Orders() {
   const symbols = [...new Set([...open, ...history].map((o) => o.symbol))].sort()
 
   const exportCsv = () => {
-    const header = ['Tarih', 'Hesap', 'Sembol', 'Tip', 'Yön', 'Miktar', 'Fiyat', 'Stop', 'Ort. Fiyat', 'Durum', 'Kaynak', 'K/Z']
+    const header = [t('Tarih'), t('Hesap'), t('Sembol'), t('Tip'), t('Yön'), t('Miktar'), t('Fiyat'), t('Stop'), t('Ort. Fiyat'), t('Durum'), t('Kaynak'), t('K/Z')]
     const rows = filtered.map((o) => [
       fmtDateTime(o.createdAt), lk.exchange[o.exchangeId]?.label, o.symbol, ORDER_TYPE_LABEL[o.type], o.side, o.qty, o.price ?? '', o.stopPrice ?? '', o.avgPrice ?? '', o.status, o.source, o.realizedPnl ?? '',
     ])
@@ -45,14 +46,14 @@ export default function Orders() {
     a.download = `emirler-${tab}.csv`
     a.click()
     URL.revokeObjectURL(a.href)
-    toast('CSV indirildi', 'info')
+    toast(t('CSV indirildi'), 'info')
   }
 
   return (
     <Card
       title={
         <Segmented
-          options={[{ value: 'open', label: `Açık Emirler (${open.length})` }, { value: 'history', label: `Geçmiş (${history.length})` }]}
+          options={[{ value: 'open', label: t('Açık Emirler ({0})', open.length) }, { value: 'history', label: t('Geçmiş ({0})', history.length) }]}
           value={tab}
           onChange={(v) => {
             setTab(v)
@@ -66,11 +67,11 @@ export default function Orders() {
             <button
               className="btn btn-outline-danger"
               onClick={async () => {
-                const ok = await confirm({ title: 'Tüm açık emirleri iptal et', message: `${filters.exchangeId ? lk.exchange[filters.exchangeId]?.label : 'Tüm hesaplardaki'} ${filters.symbol || ''} açık emirler iptal edilecek.`, confirmText: 'Hepsini İptal Et', variant: 'danger' })
+                const ok = await confirm({ title: t('Tüm açık emirleri iptal et'), message: t('{0} {1} açık emirler iptal edilecek.', filters.exchangeId ? lk.exchange[filters.exchangeId]?.label : t('Tüm hesaplardaki'), filters.symbol || ''), confirmText: t('Hepsini İptal Et'), variant: 'danger' })
                 if (ok) cancelAll.mutate({ exchangeId: filters.exchangeId || undefined, symbol: filters.symbol || undefined })
               }}
             >
-              <FiXCircle /> Tümünü İptal Et
+              <FiXCircle /> {t('Tümünü İptal Et')}
             </button>
           )}
           <button className="btn btn-soft" onClick={exportCsv}><FiDownload /> CSV</button>
@@ -80,43 +81,43 @@ export default function Orders() {
     >
       <div className="row g-2 px-4 mb-3">
         <div className="col-md col-6">
-          <select className="form-select form-select-sm" value={filters.exchangeId} onChange={set('exchangeId')} aria-label="Hesap">
-            <option value="">Tüm hesaplar</option>
+          <select className="form-select form-select-sm" value={filters.exchangeId} onChange={set('exchangeId')} aria-label={t('Hesap')}>
+            <option value="">{t('Tüm hesaplar')}</option>
             {lk.exchanges.map((e) => <option key={e.id} value={e.id}>{e.label}</option>)}
           </select>
         </div>
         <div className="col-md col-6">
-          <select className="form-select form-select-sm" value={filters.symbol} onChange={set('symbol')} aria-label="Sembol">
-            <option value="">Tüm semboller</option>
+          <select className="form-select form-select-sm" value={filters.symbol} onChange={set('symbol')} aria-label={t('Sembol')}>
+            <option value="">{t('Tüm semboller')}</option>
             {symbols.map((s) => <option key={s}>{s}</option>)}
           </select>
         </div>
         <div className="col-md col-4">
-          <select className="form-select form-select-sm" value={filters.side} onChange={set('side')} aria-label="Yön">
-            <option value="">Alış + Satış</option>
-            <option value="buy">Alış</option>
-            <option value="sell">Satış</option>
+          <select className="form-select form-select-sm" value={filters.side} onChange={set('side')} aria-label={t('Yön')}>
+            <option value="">{t('Alış + Satış')}</option>
+            <option value="buy">{t('Alış')}</option>
+            <option value="sell">{t('Satış')}</option>
           </select>
         </div>
         <div className="col-md col-4">
-          <select className="form-select form-select-sm" value={filters.type} onChange={set('type')} aria-label="Tip">
-            <option value="">Tüm tipler</option>
+          <select className="form-select form-select-sm" value={filters.type} onChange={set('type')} aria-label={t('Tip')}>
+            <option value="">{t('Tüm tipler')}</option>
             {Object.entries(ORDER_TYPE_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
           </select>
         </div>
         <div className="col-md col-4">
-          <select className="form-select form-select-sm" value={filters.source} onChange={set('source')} aria-label="Kaynak">
-            <option value="">Tüm kaynaklar</option>
-            <option value="manual">Manuel</option>
-            <option value="rule">Kural</option>
-            <option value="bot">Bot</option>
-            <option value="system">Sistem (SL/TP)</option>
+          <select className="form-select form-select-sm" value={filters.source} onChange={set('source')} aria-label={t('Kaynak')}>
+            <option value="">{t('Tüm kaynaklar')}</option>
+            <option value="manual">{t('Manuel')}</option>
+            <option value="rule">{t('Kural')}</option>
+            <option value="bot">{t('Bot')}</option>
+            <option value="system">{t('Sistem (SL/TP)')}</option>
           </select>
         </div>
       </div>
       <OrdersTable orders={filtered.slice((current - 1) * PER_PAGE, current * PER_PAGE)} history={tab === 'history'} />
       <div className="d-flex justify-content-between align-items-center flex-wrap gap-3 px-4 pt-3">
-        <small className="text-muted">Toplam {filtered.length} emir</small>
+        <small className="text-muted">{t('Toplam')} {filtered.length} {t('emir')}</small>
         <Pagination page={current} pages={pages} onChange={setPage} />
       </div>
     </Card>

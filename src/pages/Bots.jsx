@@ -10,18 +10,19 @@ import { useApp } from '../context/AppContext'
 import { useBotAction, useBots, useCreateBot, useLookups, useRisk } from '../api/queries'
 import { tickerStore } from '../hooks/useMarket'
 import { duration, fmtMoney, fmtNum, fmtPct, fmtSignedMoney, pnlClass } from '../utils/format'
+import { t, pctText } from '../i18n'
 
 const STRATEGIES = {
-  dca: { icon: FiRepeat, short: 'DCA', name: 'DCA (Kademeli Alım)', text: 'Belirli aralıklarla sabit tutarda alır, ortalama maliyeti düşürür, hedef kârda satar.' },
-  grid: { icon: FiGrid, short: 'Grid', name: 'Grid (Aralık)', text: 'Belirlediğiniz fiyat aralığında kademeli al-sat yaparak yatay piyasadan kâr eder.' },
-  trailing: { icon: FiTrendingUp, short: 'Trend', name: 'Trend Takip', text: 'Yükselişte pozisyonu tutar, iz süren stop ile kârı korur.' },
+  dca: { icon: FiRepeat, short: 'DCA', name: t('DCA (Kademeli Alım)'), text: t('Belirli aralıklarla sabit tutarda alır, ortalama maliyeti düşürür, hedef kârda satar.') },
+  grid: { icon: FiGrid, short: t('Grid'), name: t('Grid (Aralık)'), text: t('Belirlediğiniz fiyat aralığında kademeli al-sat yaparak yatay piyasadan kâr eder.') },
+  trailing: { icon: FiTrendingUp, short: t('Trend'), name: t('Trend Takip'), text: t('Yükselişte pozisyonu tutar, iz süren stop ile kârı korur.') },
 }
 
 const configText = (b, quote) => {
   const c = b.config || {}
-  if (b.strategy === 'dca') return [`${fmtMoney(c.amount, quote)} / ${c.intervalHours >= 24 ? `${c.intervalHours / 24} gün` : `${c.intervalHours} saat`}`, `TP %${c.takeProfitPct}`, `maks ${c.maxOrders} alım`]
-  if (b.strategy === 'grid') return [`${fmtNum(c.lower)} – ${fmtNum(c.upper)}`, `${c.grids} kademe`]
-  return [`İz %${c.trailingPct}`, c.takeProfitPct ? `TP %${c.takeProfitPct}` : null].filter(Boolean)
+  if (b.strategy === 'dca') return [`${fmtMoney(c.amount, quote)} / ${c.intervalHours >= 24 ? t('{0} gün', c.intervalHours / 24) : t('{0} saat', c.intervalHours)}`, `TP ${pctText(c.takeProfitPct)}`, t('maks {0} alım', c.maxOrders)]
+  if (b.strategy === 'grid') return [`${fmtNum(c.lower)} – ${fmtNum(c.upper)}`, t('{0} kademe', c.grids)]
+  return [t('İz %{0}', c.trailingPct), c.takeProfitPct ? `TP ${pctText(c.takeProfitPct)}` : null].filter(Boolean)
 }
 
 function BotCard({ bot: b }) {
@@ -45,7 +46,7 @@ function BotCard({ bot: b }) {
       </div>
       <div className="d-flex justify-content-between align-items-end mt-3">
         <div>
-          <div className="fs-12 text-muted">Toplam K/Z</div>
+          <div className="fs-12 text-muted">{t('Toplam K/Z')}</div>
           <div className={`fs-4 fw-bold num text-nowrap ${pnlClass(b.pnl)}`}>{fmtSignedMoney(b.pnl, quote)}</div>
           <div className={`fs-13 num ${pnlClass(pct)}`}>{fmtPct(pct)}</div>
         </div>
@@ -53,7 +54,7 @@ function BotCard({ bot: b }) {
           <Chart
             type="area"
             height={60}
-            series={[{ name: 'K/Z', data: b.pnlHistory }]}
+            series={[{ name: t('K/Z'), data: b.pnlHistory }]}
             options={{
               chart: { sparkline: { enabled: true }, animations: { enabled: false } },
               stroke: { curve: 'smooth', width: 2 },
@@ -65,30 +66,30 @@ function BotCard({ bot: b }) {
         </div>
       </div>
       <div className="bot-stats">
-        <div><small>Yatırım</small><span className="num">{fmtMoney(b.investment, quote, 0)}</span></div>
-        <div><small>İşlem</small><span className="num">{b.trades}</span></div>
-        <div><small>Süre</small><span>{b.startedAt && b.status !== 'stopped' ? duration(b.startedAt) : '–'}</span></div>
+        <div><small>{t('Yatırım')}</small><span className="num">{fmtMoney(b.investment, quote, 0)}</span></div>
+        <div><small>{t('İşlem@@sayı')}</small><span className="num">{b.trades}</span></div>
+        <div><small>{t('Süre')}</small><span>{b.startedAt && b.status !== 'stopped' ? duration(b.startedAt) : '–'}</span></div>
       </div>
       <div className="d-flex flex-wrap gap-1 mb-3">
         {configText(b, quote).map((x) => <span key={x} className="chip gray">{x}</span>)}
       </div>
       <div className="fs-13 mb-3"><ExchangeTag exchange={lk.exchange[b.exchangeId]} /></div>
       <div className="d-flex gap-2 mt-auto">
-        {b.status !== 'running' && <button className="btn btn-sm btn-success flex-fill" onClick={() => run('start')} disabled={action.isPending}><FiPlay /> Başlat</button>}
-        {b.status === 'running' && <button className="btn btn-sm btn-warning flex-fill" onClick={() => run('pause')} disabled={action.isPending}><FiPause /> Duraklat</button>}
+        {b.status !== 'running' && <button className="btn btn-sm btn-success flex-fill" onClick={() => run('start')} disabled={action.isPending}><FiPlay /> {t('Başlat')}</button>}
+        {b.status === 'running' && <button className="btn btn-sm btn-warning flex-fill" onClick={() => run('pause')} disabled={action.isPending}><FiPause /> {t('Duraklat')}</button>}
         {b.status !== 'stopped' && (
           <button
             className="btn btn-sm btn-outline-danger flex-fill"
-            onClick={async () => (await confirm({ title: 'Botu durdur', message: `${b.name} durdurulacak. Açık bot emirleri iptal edilir, mevcut pozisyon korunur.`, confirmText: 'Durdur', variant: 'danger' })) && run('stop')}
+            onClick={async () => (await confirm({ title: t('Botu durdur'), message: t('{0} durdurulacak. Açık bot emirleri iptal edilir, mevcut pozisyon korunur.', b.name), confirmText: t('Durdur'), variant: 'danger' })) && run('stop')}
           >
-            <FiSquare /> Durdur
+            <FiSquare /> {t('Durdur')}
           </button>
         )}
         {b.status === 'stopped' && (
           <button
             className="btn btn-sm btn-outline-danger"
-            onClick={async () => (await confirm({ title: 'Botu sil', message: `${b.name} kalıcı olarak silinecek.`, confirmText: 'Sil', variant: 'danger' })) && run('remove')}
-            aria-label="Sil"
+            onClick={async () => (await confirm({ title: t('Botu sil'), message: t('{0} kalıcı olarak silinecek.', b.name), confirmText: t('Sil'), variant: 'danger' })) && run('remove')}
+            aria-label={t('Sil')}
           >
             <FiTrash2 />
           </button>
@@ -100,7 +101,7 @@ function BotCard({ bot: b }) {
 
 function CreateBotModal({ onClose }) {
   const lk = useLookups()
-  const create = useCreateBot({ success: (d) => `${d.name} oluşturuldu`, onSuccess: onClose })
+  const create = useCreateBot({ success: (d) => t('{0} oluşturuldu', d.name), onSuccess: onClose })
   const usable = lk.exchanges.filter((e) => e.status === 'connected')
   const [f, setF] = useState(() => {
     const ex = usable[0]
@@ -123,11 +124,16 @@ function CreateBotModal({ onClose }) {
     set({ symbol: sym })
     setC({ lower: +(p * 0.92).toPrecision(5), upper: +(p * 1.08).toPrecision(5) })
   }
+  // Form alanları metin tutar ("2386"); toplama yapmadan önce sayıya çevir (yoksa "2637"+"2386" birleşir)
   const gridProfit = useMemo(() => {
-    const { lower, upper, grids } = f.config
-    if (!(upper > lower && grids > 1)) return null
-    return (((upper - lower) / grids) / ((upper + lower) / 2)) * 100 - 0.2
+    const lower = +f.config.lower
+    const upper = +f.config.upper
+    const grids = +f.config.grids
+    if (!(upper > lower && lower > 0 && grids > 1)) return null
+    return (((upper - lower) / grids) / ((upper + lower) / 2)) * 100 - 0.2 // alış + satış komisyonu ~%0,2
   }, [f.config])
+  // Güncel fiyat aralığın dışındaysa grid bot fiyat aralığa girene kadar işlem yapmaz
+  const gridOutOfRange = f.strategy === 'grid' && last > 0 && +f.config.upper > +f.config.lower && (last < +f.config.lower || last > +f.config.upper)
 
   const submit = () => {
     const c = f.config
@@ -140,14 +146,14 @@ function CreateBotModal({ onClose }) {
 
   return (
     <Modal
-      title="Yeni Bot"
+      title={t('Yeni Bot')}
       size="modal-lg"
       onClose={onClose}
       onSubmit={submit}
       footer={
         <>
-          <button type="button" className="btn btn-soft" onClick={onClose}>Vazgeç</button>
-          <button className="btn btn-primary" disabled={create.isPending}>{f.autoStart ? 'Oluştur ve Başlat' : 'Oluştur'}</button>
+          <button type="button" className="btn btn-soft" onClick={onClose}>{t('Vazgeç')}</button>
+          <button className="btn btn-primary" disabled={create.isPending}>{f.autoStart ? t('Oluştur ve Başlat') : t('Oluştur')}</button>
         </>
       }
     >
@@ -165,31 +171,31 @@ function CreateBotModal({ onClose }) {
 
       <div className="row g-3">
         <div className="col-md-6">
-          <label className="form-label">Hesap</label>
+          <label className="form-label">{t('Hesap')}</label>
           <select className="form-select" value={f.exchangeId} onChange={(e) => {
             const nx = lk.exchange[e.target.value]
             const sym = lk.instruments.find((i) => i.market === nx?.market)?.symbol
             set({ exchangeId: e.target.value })
             if (sym) changeSymbol(sym)
           }}>
-            {usable.map((e) => <option key={e.id} value={e.id}>{e.label}{e.paused ? ' (duraklatılmış)' : ''}</option>)}
+            {usable.map((e) => <option key={e.id} value={e.id}>{e.label}{e.paused ? t(' (duraklatılmış)') : ''}</option>)}
           </select>
         </div>
         <div className="col-md-6">
-          <label className="form-label">Sembol</label>
+          <label className="form-label">{t('Sembol')}</label>
           <select className="form-select" value={f.symbol} onChange={(e) => changeSymbol(e.target.value)}>
             {symbols.map((i) => <option key={i.symbol}>{i.symbol}</option>)}
           </select>
-          {last && <div className="form-help mt-1">Güncel: {fmtNum(last)} {ins?.quote}</div>}
+          {last && <div className="form-help mt-1">{t('Güncel:')} {fmtNum(last)} {ins?.quote}</div>}
         </div>
         <div className="col-md-6">
-          <label className="form-label">Bot adı</label>
-          <input className="form-control" value={f.name} onChange={(e) => set({ name: e.target.value })} placeholder="Otomatik" />
+          <label className="form-label">{t('Bot adı')}</label>
+          <input className="form-control" value={f.name} onChange={(e) => set({ name: e.target.value })} placeholder={t('Otomatik')} />
         </div>
         <div className="col-md-6">
-          <label className="form-label">Ayrılacak tutar</label>
+          <label className="form-label">{t('Ayrılacak tutar')}</label>
           <div className="input-group">
-            <input type="number" className="form-control" value={f.investment} onChange={(e) => set({ investment: e.target.value })} placeholder="Örn. 1000" />
+            <input type="number" className="form-control" value={f.investment} onChange={(e) => set({ investment: e.target.value })} placeholder={t('Örn. 1000')} />
             <span className="input-group-text">{ins?.quote}</span>
           </div>
         </div>
@@ -197,25 +203,25 @@ function CreateBotModal({ onClose }) {
         {f.strategy === 'dca' && (
           <>
             <div className="col-md-3 col-6">
-              <label className="form-label">Alım tutarı</label>
+              <label className="form-label">{t('Alım tutarı')}</label>
               <input type="number" className="form-control" value={f.config.amount} onChange={(e) => setC({ amount: e.target.value })} />
             </div>
             <div className="col-md-3 col-6">
-              <label className="form-label">Aralık</label>
+              <label className="form-label">{t('Aralık')}</label>
               <select className="form-select" value={f.config.intervalHours} onChange={(e) => setC({ intervalHours: +e.target.value })}>
-                <option value={1}>Saatlik</option>
-                <option value={4}>4 saat</option>
-                <option value={12}>12 saat</option>
-                <option value={24}>Günlük</option>
-                <option value={168}>Haftalık</option>
+                <option value={1}>{t('Saatlik')}</option>
+                <option value={4}>{t('4 saat')}</option>
+                <option value={12}>{t('12 saat')}</option>
+                <option value={24}>{t('Günlük')}</option>
+                <option value={168}>{t('Haftalık')}</option>
               </select>
             </div>
             <div className="col-md-3 col-6">
-              <label className="form-label">Hedef kâr %</label>
+              <label className="form-label">{t('Hedef kâr %')}</label>
               <input type="number" className="form-control" value={f.config.takeProfitPct} onChange={(e) => setC({ takeProfitPct: e.target.value })} />
             </div>
             <div className="col-md-3 col-6">
-              <label className="form-label">Maks. alım</label>
+              <label className="form-label">{t('Maks. alım')}</label>
               <input type="number" className="form-control" value={f.config.maxOrders} onChange={(e) => setC({ maxOrders: e.target.value })} />
             </div>
           </>
@@ -223,28 +229,29 @@ function CreateBotModal({ onClose }) {
         {f.strategy === 'grid' && (
           <>
             <div className="col-md-4">
-              <label className="form-label">Alt fiyat</label>
+              <label className="form-label">{t('Alt fiyat')}</label>
               <input type="number" step="any" className="form-control" value={f.config.lower} onChange={(e) => setC({ lower: e.target.value })} />
             </div>
             <div className="col-md-4">
-              <label className="form-label">Üst fiyat</label>
+              <label className="form-label">{t('Üst fiyat')}</label>
               <input type="number" step="any" className="form-control" value={f.config.upper} onChange={(e) => setC({ upper: e.target.value })} />
             </div>
             <div className="col-md-4">
-              <label className="form-label">Kademe sayısı</label>
+              <label className="form-label">{t('Kademe sayısı')}</label>
               <input type="number" className="form-control" value={f.config.grids} onChange={(e) => setC({ grids: e.target.value })} />
             </div>
-            {gridProfit !== null && <div className="col-12 form-help">Kademe başına tahmini kâr: ~%{fmtNum(gridProfit, 2)} (komisyon sonrası)</div>}
+            {gridProfit !== null && <div className="col-12 form-help">{t('Kademe başına tahmini kâr: ~{0}', pctText(fmtNum(gridProfit, 2)))} {t('(komisyon sonrası)')}</div>}
+            {gridOutOfRange && <div className="col-12 form-help text-warning">{t('Güncel fiyat bu aralığın dışında: bot, fiyat aralığa girene kadar işlem yapmaz.')}</div>}
           </>
         )}
         {f.strategy === 'trailing' && (
           <>
             <div className="col-md-6">
-              <label className="form-label">İz mesafesi %</label>
+              <label className="form-label">{t('İz mesafesi %')}</label>
               <input type="number" step="0.1" className="form-control" value={f.config.trailingPct} onChange={(e) => setC({ trailingPct: e.target.value })} />
             </div>
             <div className="col-md-6">
-              <label className="form-label">Hedef kâr % (isteğe bağlı)</label>
+              <label className="form-label">{t('Hedef kâr % (isteğe bağlı)')}</label>
               <input type="number" className="form-control" value={f.config.takeProfitPct} onChange={(e) => setC({ takeProfitPct: e.target.value })} />
             </div>
           </>
@@ -252,7 +259,7 @@ function CreateBotModal({ onClose }) {
         <div className="col-12">
           <div className="form-check">
             <input id="autostart" type="checkbox" className="form-check-input" checked={f.autoStart} onChange={(e) => set({ autoStart: e.target.checked })} />
-            <label htmlFor="autostart" className="form-check-label">Oluşturduktan sonra hemen başlat</label>
+            <label htmlFor="autostart" className="form-check-label">{t('Oluşturduktan sonra hemen başlat')}</label>
           </div>
         </div>
       </div>
@@ -275,34 +282,34 @@ export default function Bots() {
     <>
       <div className="row">
         <div className="col-md-4">
-          <Card><div className="text-muted">Çalışan bot</div><div className="fs-2 fw-bold">{bots.filter((b) => b.status === 'running').length} <span className="fs-6 text-muted fw-normal">/ {bots.length}</span></div></Card>
+          <Card><div className="text-muted">{t('Çalışan bot')}</div><div className="fs-2 fw-bold">{bots.filter((b) => b.status === 'running').length} <span className="fs-6 text-muted fw-normal">/ {bots.length}</span></div></Card>
         </div>
         <div className="col-md-4">
-          <Card><div className="text-muted">Botlara ayrılan (aktif)</div><div className="fs-2 fw-bold num">{fmtMoney(totalInv, 'USD', 0)}</div></Card>
+          <Card><div className="text-muted">{t('Botlara ayrılan (aktif)')}</div><div className="fs-2 fw-bold num">{fmtMoney(totalInv, 'USD', 0)}</div></Card>
         </div>
         <div className="col-md-4">
-          <Card><div className="text-muted">Toplam bot K/Z</div><div className={`fs-2 fw-bold num ${pnlClass(totalPnl)}`}>{fmtSignedMoney(totalPnl)}</div></Card>
+          <Card><div className="text-muted">{t('Toplam bot K/Z')}</div><div className={`fs-2 fw-bold num ${pnlClass(totalPnl)}`}>{fmtSignedMoney(totalPnl)}</div></Card>
         </div>
       </div>
 
-      {risk?.killSwitch?.active && <div className="alert alert-danger">Acil durdurma aktif – botlar başlatılamaz.</div>}
+      {risk?.killSwitch?.active && <div className="alert alert-danger">{t('Acil durdurma aktif – botlar başlatılamaz.')}</div>}
 
       <div className="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
         <Segmented
           options={[
-            { value: 'all', label: 'Tümü' },
-            { value: 'running', label: 'Çalışan' },
-            { value: 'paused', label: 'Duraklatılan' },
-            { value: 'stopped', label: 'Durdurulan' },
+            { value: 'all', label: t('Tümü') },
+            { value: 'running', label: t('Çalışan') },
+            { value: 'paused', label: t('Duraklatılan') },
+            { value: 'stopped', label: t('Durdurulan') },
           ]}
           value={filter}
           onChange={setFilter}
         />
-        <button className="btn btn-primary" onClick={() => setCreating(true)}><FiPlus /> Yeni Bot</button>
+        <button className="btn btn-primary" onClick={() => setCreating(true)}><FiPlus /> {t('Yeni Bot')}</button>
       </div>
 
       {!isLoading && !list.length ? (
-        <Card><EmptyState icon={FiCpu} title="Bot bulunamadı" text="DCA veya Grid stratejisiyle ilk botunuzu oluşturun." /></Card>
+        <Card><EmptyState icon={FiCpu} title={t('Bot bulunamadı')} text={t('DCA veya Grid stratejisiyle ilk botunuzu oluşturun.')} /></Card>
       ) : (
         <div className="row g-4 mb-4">
           {list.map((b) => (

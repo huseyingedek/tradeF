@@ -6,17 +6,18 @@ import { useCancelOrder, useLookups } from '../../api/queries'
 import { useApp } from '../../context/AppContext'
 import { fmtDateTime, fmtMoney, fmtNum, fmtQty, pnlClass } from '../../utils/format'
 import { ORDER_TYPE_LABEL } from '../../utils/trading'
+import { t, tServer } from '../../i18n'
 
 const priceText = (o) => {
   switch (o.type) {
     case 'market':
-      return 'Piyasa'
+      return t('Piyasa')
     case 'stop_market':
-      return `Stop ${fmtNum(o.stopPrice)}`
+      return t('Stop {0}', fmtNum(o.stopPrice))
     case 'stop_limit':
-      return `${fmtNum(o.price)} (stop ${fmtNum(o.stopPrice)})`
+      return t('{0} (stop {1})', fmtNum(o.price), fmtNum(o.stopPrice))
     case 'trailing_stop':
-      return `İz %${o.trailingPct}`
+      return t('İz %{0}', o.trailingPct)
     case 'oco':
       return `TP ${fmtNum(o.price)} / SL ${fmtNum(o.stopPrice)}`
     default:
@@ -29,10 +30,10 @@ export default function OrdersTable({ orders = [], history = false, compact = fa
   const cancel = useCancelOrder()
   const { confirm } = useApp()
 
-  if (!orders.length) return <EmptyState title={history ? 'Emir geçmişi boş' : 'Açık emir yok'} text={emptyText} />
+  if (!orders.length) return <EmptyState title={history ? t('Emir geçmişi boş') : t('Açık emir yok')} text={emptyText} />
 
   const onCancel = async (o) => {
-    const ok = await confirm({ title: 'Emri iptal et', message: `${o.symbol} ${fmtQty(o.qty)} ${ORDER_TYPE_LABEL[o.type]} ${o.side === 'buy' ? 'alış' : 'satış'} emri iptal edilsin mi?`, confirmText: 'İptal Et', variant: 'danger' })
+    const ok = await confirm({ title: t('Emri iptal et'), message: t('{0} {1} {2} {3} emri iptal edilsin mi?', o.symbol, fmtQty(o.qty), ORDER_TYPE_LABEL[o.type], o.side === 'buy' ? t('alış') : t('satış')), confirmText: t('İptal Et'), variant: 'danger' })
     if (ok) cancel.mutate(o.id)
   }
 
@@ -41,18 +42,18 @@ export default function OrdersTable({ orders = [], history = false, compact = fa
       <table className="table table-hover table-trading">
         <thead>
           <tr>
-            <th className="ps-4">Tarih</th>
-            <th>Sembol</th>
-            {!compact && <th>Hesap</th>}
-            <th>Tip</th>
-            <th>Yön</th>
-            <th className="text-end">Fiyat</th>
-            <th className="text-end">Miktar</th>
-            {history && <th className="text-end">Ort. Fiyat</th>}
-            {history && <th className="text-end">K/Z</th>}
-            <th>Durum</th>
-            {!compact && <th>Kaynak</th>}
-            {!history && <th className="pe-4 text-end">İşlem</th>}
+            <th className="ps-4">{t('Tarih')}</th>
+            <th>{t('Sembol')}</th>
+            {!compact && <th>{t('Hesap')}</th>}
+            <th>{t('Tip')}</th>
+            <th>{t('Yön')}</th>
+            <th className="text-end">{t('Fiyat')}</th>
+            <th className="text-end">{t('Miktar')}</th>
+            {history && <th className="text-end">{t('Ort. Fiyat')}</th>}
+            {history && <th className="text-end">{t('K/Z')}</th>}
+            <th>{t('Durum')}</th>
+            {!compact && <th>{t('Kaynak')}</th>}
+            {!history && <th className="pe-4 text-end">{t('İşlem')}</th>}
           </tr>
         </thead>
         <tbody>
@@ -71,12 +72,12 @@ export default function OrdersTable({ orders = [], history = false, compact = fa
                 {history && <td className={`text-end num ${pnlClass(o.realizedPnl)}`}>{o.realizedPnl ? fmtMoney(o.realizedPnl, quote) : '–'}</td>}
                 <td>
                   <StatusBadge status={o.status} />
-                  {o.reason && <div className="fs-12 text-down mt-1">{o.reason}</div>}
+                  {o.reason && <div className="fs-12 text-down mt-1">{tServer(o.reason)}</div>}
                 </td>
                 {!compact && <td><SourceBadge source={o.source} /></td>}
                 {!history && (
                   <td className="pe-4 text-end">
-                    <button className="btn btn-sm btn-outline-danger" onClick={() => onCancel(o)} disabled={cancel.isPending}><FiX /> İptal</button>
+                    <button className="btn btn-sm btn-outline-danger" onClick={() => onCancel(o)} disabled={cancel.isPending}><FiX /> {t('İptal')}</button>
                   </td>
                 )}
               </tr>
